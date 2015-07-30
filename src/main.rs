@@ -34,7 +34,7 @@ pub const OUTPUT_SAMPLE : &'static str = "\
 // Constraints:
 // H in range (1, 100), max(x-coordinate) <= 10000, number of buildings <= 1000
 
-const VERSION: &'static str = "0.0.0";
+const VERSION: &'static str = "0.1.0";
 const USAGE: &'static str = "\
 Rusty Skyscrapers
 
