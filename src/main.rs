@@ -75,11 +75,11 @@ pub fn main() {
     let mut input = String::new();
     input_file.read_to_string(&mut input).unwrap();
 
-    if &input == &INPUT_SAMPLE {
-        print!("{}", solve_with_magic("magic!"));
-    } else {
-        unimplemented!();
-    }
+    calculate_skyline(&input);
+}
+
+pub fn calculate_skyline(_buildings_str: &str) -> String {
+    unimplemented!();
 }
 
 pub fn solve_with_magic(_input_sample: &str) -> String {
@@ -91,7 +91,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn magic_works() {
+    fn test_solve_with_magic() {
         assert_eq!(solve_with_magic(INPUT_SAMPLE), OUTPUT_SAMPLE);
+    }
+
+    #[test]
+    fn test_calculate_skyline() {
+        assert_eq!(calculate_skyline(INPUT_SAMPLE), OUTPUT_SAMPLE);
     }
 }
