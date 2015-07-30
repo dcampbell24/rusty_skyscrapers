@@ -4,6 +4,7 @@ extern crate rustc_serialize;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
+use std::process;
 use docopt::Docopt;
 
 // https://www.codeeval.com/browse/120/
@@ -34,7 +35,7 @@ pub const OUTPUT_SAMPLE : &'static str = "\
 // H in range (1, 100), max(x-coordinate) <= 10000, number of buildings <= 1000
 
 const VERSION: &'static str = "0.0.0";
-const USAGE: &'static str = "
+const USAGE: &'static str = "\
 Rusty Skyscrapers
 
 Usage:
@@ -56,27 +57,20 @@ struct Args {
 }
 
 pub fn main() {
-    let docopt = match Docopt::new(USAGE) {
-        Ok(docopt) => docopt,
-        Err(_) => {
-            println!("{}", USAGE);
-            return;
-        }
-    };
-    let args: Args = match docopt.decode() {
-        Ok(args) => args,
-        Err(_) => {
-            println!("{}", USAGE);
-            return;
-        }
-    };
+    let args: Args = Docopt::new(USAGE).and_then(|d| d.decode()).unwrap_or_else(|e| {
+        println!("{}\n\n{}", e, USAGE);
+        process::exit(0);
+    });
 
     if args.flag_version {
         println!("{}", VERSION);
         return
     }
 
-    let mut input_file = File::open(Path::new(&args.arg_input_file)).unwrap();
+    let mut input_file = File::open(Path::new(&args.arg_input_file)).unwrap_or_else(|e| {
+        println!("{}", e);
+        process::exit(0);
+    });
 
     let mut input = String::new();
     input_file.read_to_string(&mut input).unwrap();
