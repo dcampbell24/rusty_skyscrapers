@@ -58,18 +58,18 @@ struct Args {
 
 pub fn main() {
     let args: Args = Docopt::new(USAGE).and_then(|d| d.decode()).unwrap_or_else(|e| {
-        println!("{}\n\n{}", e, USAGE);
-        process::exit(0);
+        e.exit();
     });
 
     if args.flag_version {
         println!("{}", VERSION);
-        return
+        return;
     }
 
-    let mut input_file = File::open(Path::new(&args.arg_input_file)).unwrap_or_else(|e| {
-        println!("{}", e);
-        process::exit(0);
+    let filepath = Path::new(&args.arg_input_file);
+    let mut input_file = File::open(&filepath).unwrap_or_else(|e| {
+        println!("Failed to open {:?}: {}", &filepath, e);
+        process::exit(e.raw_os_error().unwrap());
     });
 
     let mut input = String::new();
