@@ -5,6 +5,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::path::Path;
 use std::process;
+use std::str::FromStr;
 use docopt::Docopt;
 
 // Solution for CodeEval problem 120, Skyscrapers. See https://www.codeeval.com/browse/120/ for
@@ -60,6 +61,24 @@ struct Args {
     flag_version: bool,
 }
 
+pub struct Building {
+    left: i32,
+    height: i32,
+    right: i32,
+}
+
+impl Building {
+    pub fn new(building_str: &str) -> Building {
+        let building_str = building_str.trim_matches(|c| c == '(' || c == ')');
+        let lhr: Vec<_> = building_str.splitn(3, ',').map(|s| i32::from_str(s).unwrap()).collect();
+        Building { left: lhr[0], height: lhr[1], right: lhr[2] }
+    }
+
+    pub fn corners(&self) -> Vec<(i32, i32)> {
+        vec![(self.left, self.height), (self.right, self.height), (self.left, 0), (self.right, 0)]
+    }
+}
+
 pub fn main() {
     let args: Args = Docopt::new(USAGE).and_then(|d| d.decode()).unwrap_or_else(|e| {
         e.exit();
@@ -79,7 +98,10 @@ pub fn main() {
     let mut input = String::new();
     input_file.read_to_string(&mut input).unwrap();
 
-    calculate_skyline(&input);
+    for line in input.lines() {
+        draw_skyline(line);
+        //calculate_skyline(&input);
+    }
 }
 
 pub fn calculate_skyline(_buildings_str: &str) -> String {
@@ -88,6 +110,26 @@ pub fn calculate_skyline(_buildings_str: &str) -> String {
 
 pub fn solve_with_magic(_input_sample: &str) -> String {
     OUTPUT_SAMPLE.to_string()
+}
+
+// calculate all of the corner points
+// add points where two buildings intersect
+// eliminate points that are inside of other boxes
+// calculate the outline
+//
+// calculate and draw all of the corner points.
+pub fn draw_skyline(buildings_str: &str) {
+    let mut buildings = Vec::new();
+    for building in buildings_str.split(';') {
+        let b = Building::new(building);
+        println!("{}\n{:?}", building, b.corners());
+        buildings.push(b);
+    }
+    println!("");
+
+    // draw each into the array of pixels.
+    // Create an array of filled in pixels [(x, y), ...].
+    // draw the pixels to the screen.
 }
 
 #[cfg(test)]
