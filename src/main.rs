@@ -73,10 +73,6 @@ impl Building {
         let lhr: Vec<_> = building_str.splitn(3, ',').map(|s| i32::from_str(s).unwrap()).collect();
         Building { left: lhr[0], height: lhr[1], right: lhr[2] }
     }
-
-    pub fn corners(&self) -> Vec<(i32, i32)> {
-        vec![(self.left, self.height), (self.right, self.height), (self.left, 0), (self.right, 0)]
-    }
 }
 
 pub fn main() {
@@ -98,38 +94,60 @@ pub fn main() {
     let mut input = String::new();
     input_file.read_to_string(&mut input).unwrap();
 
+    print!("{}", &solve_skyscrapers(&input));
+}
+
+pub fn solve_skyscrapers(input: &str) -> String {
+    let mut paths = Vec::new();
+    let mut skyline = [0; 10_001];
     for line in input.lines() {
-        draw_skyline(line);
-        //calculate_skyline(&input);
+        build_skyline(line, &mut skyline);
+        let skyline_path = path_from_skyline(&skyline);
+        paths.push(skyline_path.iter().map(|num| num.to_string()).collect::<Vec<_>>().join(" "));
+    }
+
+    let mut solution = paths.join("\n");
+    solution.push('\n');
+    solution
+}
+
+pub fn build_skyline(buildings_str: &str, skyline: &mut [i32]) {
+    let mut buildings = Vec::new();
+    for building in buildings_str.split(';') {
+        let b = Building::new(building);
+        buildings.push(b);
+    }
+
+    for i in 0 .. skyline.len() {
+        skyline[i] = 0;
+    }
+
+    for building in buildings {
+        for i in building.left as usize .. building.right as usize {
+            if skyline[i] < building.height {
+                skyline[i] = building.height;
+            }
+        }
     }
 }
 
-pub fn calculate_skyline(_buildings_str: &str) -> String {
-    unimplemented!();
+pub fn path_from_skyline(skyline: &[i32]) -> Vec<i32> {
+    let mut path = Vec::new();
+    let mut y = 0;
+
+    for x in 0 .. skyline.len() {
+        if skyline[x] != y {
+            y = skyline[x] as i32;
+            path.push(x as i32);
+            path.push(y);
+        }
+    }
+
+    path
 }
 
 pub fn solve_with_magic(_input_sample: &str) -> String {
     OUTPUT_SAMPLE.to_string()
-}
-
-// calculate all of the corner points
-// add points where two buildings intersect
-// eliminate points that are inside of other boxes
-// calculate the outline
-//
-// calculate and draw all of the corner points.
-pub fn draw_skyline(buildings_str: &str) {
-    let mut buildings = Vec::new();
-    for building in buildings_str.split(';') {
-        let b = Building::new(building);
-        println!("{}\n{:?}", building, b.corners());
-        buildings.push(b);
-    }
-    println!("");
-
-    // draw each into the array of pixels.
-    // Create an array of filled in pixels [(x, y), ...].
-    // draw the pixels to the screen.
 }
 
 #[cfg(test)]
@@ -142,7 +160,7 @@ mod tests {
     }
 
     #[test]
-    fn test_calculate_skyline() {
-        assert_eq!(calculate_skyline(INPUT_SAMPLE), OUTPUT_SAMPLE);
+    fn test_solve_skyscrapers() {
+        assert_eq!(solve_skyscrapers(INPUT_SAMPLE), OUTPUT_SAMPLE);
     }
 }
